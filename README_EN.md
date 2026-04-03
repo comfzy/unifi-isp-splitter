@@ -19,11 +19,18 @@ UniFi stores Traffic Route configurations in a local MongoDB database. The actua
 
 ## Prerequisites
 
-Create a Traffic Route in the UniFi Web UI. Take note of:
-- **description** (rule name) — the script defaults to `First_mobilev4`
+Create a Traffic Route in the UniFi Web UI for each ISP. Take note of:
+- **description** (rule name)
 - **short_id** (maps to ipset name `UBIOS4trafficroute_ip_<short_id>`)
 
-If yours differ, edit these variables in `scripts/update_first_mobilev4.sh`:
+Two update scripts are included out of the box:
+
+| Script | Rule Name | ipset | Data Source |
+|--------|-----------|-------|-------------|
+| `update_first_mobilev4.sh` | `First_mobilev4` | `UBIOS4trafficroute_ip_3` | China Mobile |
+| `update_first_telecomv4.sh` | `First_telecomv4` | `UBIOS4trafficroute_ip_4` | China Telecom |
+
+If your rule names or short_ids differ, edit the variables in the corresponding script:
 
 ```bash
 ROUTE_DESC="First_mobilev4"           # description field in MongoDB
@@ -66,7 +73,8 @@ ssh root@<gateway-ip> "chmod +x /data/custom/scripts/*.sh"
 
 ```
 scripts/
-  update_first_mobilev4.sh    # Main script: download rsc -> extract IPs -> update MongoDB + ipset
+  update_first_mobilev4.sh    # China Mobile updater: download rsc -> extract IPs -> update MongoDB + ipset
+  update_first_telecomv4.sh   # China Telecom updater: same workflow
   10-update-mobilev4-cron.sh  # Boot hook: restore systemd service and cron after firmware upgrade
   on-boot-custom.service      # systemd unit: runs on_boot.d/*.sh at startup
 install.sh                    # One-step installer
@@ -76,8 +84,10 @@ install.sh                    # One-step installer
 
 ```
 /data/custom/
-  update_first_mobilev4.sh    # Main script
-  update_first_mobilev4.log   # Execution log (auto-trimmed to last 100 lines)
+  update_first_mobilev4.sh    # China Mobile updater
+  update_first_mobilev4.log   # Mobile execution log (auto-trimmed to last 100 lines)
+  update_first_telecomv4.sh   # China Telecom updater
+  update_first_telecomv4.log  # Telecom execution log
 
 /data/on_boot.d/
   10-update-mobilev4-cron.sh  # Restores cron on boot
@@ -89,12 +99,18 @@ install.sh                    # One-step installer
 
 ## Scheduling
 
-The default cron runs daily at **04:30**. To change the schedule:
+Default cron schedule, staggered by 10 minutes to avoid concurrent downloads:
+
+| Time | Script |
+|------|--------|
+| 04:30 | `update_first_mobilev4.sh` (China Mobile) |
+| 04:40 | `update_first_telecomv4.sh` (China Telecom) |
+
+To change the schedule:
 
 ```bash
 # On the device
 crontab -e
-# Edit the "30 4 * * *" expression
 ```
 
 ## Firmware Upgrade Recovery

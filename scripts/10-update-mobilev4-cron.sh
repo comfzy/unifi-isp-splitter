@@ -10,7 +10,10 @@ if [ -f "$SERVICE_SRC" ] && [ ! -f "$SERVICE_DST" ]; then
     systemctl enable on-boot-custom.service
 fi
 
-# Ensure cron job exists
+# Ensure cron jobs exist
 if ! crontab -l 2>/dev/null | grep -q 'update_first_mobilev4'; then
     (crontab -l 2>/dev/null; echo '30 4 * * * /data/custom/update_first_mobilev4.sh >> /data/custom/update_first_mobilev4.log 2>&1') | crontab -
+fi
+if ! crontab -l 2>/dev/null | grep -q 'update_first_telecomv4'; then
+    (crontab -l 2>/dev/null; echo '40 4 * * * /data/custom/update_first_telecomv4.sh >> /data/custom/update_first_telecomv4.log 2>&1') | crontab -
 fi

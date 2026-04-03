@@ -8,11 +8,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== Installing unifi-isp-splitter ==="
 
-# Deploy main update script
+# Deploy update scripts
 mkdir -p /data/custom
 cp "$SCRIPT_DIR/scripts/update_first_mobilev4.sh" /data/custom/update_first_mobilev4.sh
-chmod +x /data/custom/update_first_mobilev4.sh
-echo "[OK] Main script -> /data/custom/update_first_mobilev4.sh"
+cp "$SCRIPT_DIR/scripts/update_first_telecomv4.sh" /data/custom/update_first_telecomv4.sh
+chmod +x /data/custom/update_first_mobilev4.sh /data/custom/update_first_telecomv4.sh
+echo "[OK] Update scripts -> /data/custom/"
 
 # Deploy on_boot.d hooks
 mkdir -p /data/on_boot.d
@@ -31,12 +32,16 @@ echo "[OK] Systemd service enabled"
 if ! crontab -l 2>/dev/null | grep -q 'update_first_mobilev4'; then
     (crontab -l 2>/dev/null; echo '30 4 * * * /data/custom/update_first_mobilev4.sh >> /data/custom/update_first_mobilev4.log 2>&1') | crontab -
 fi
-echo "[OK] Cron job set (daily 04:30)"
+if ! crontab -l 2>/dev/null | grep -q 'update_first_telecomv4'; then
+    (crontab -l 2>/dev/null; echo '40 4 * * * /data/custom/update_first_telecomv4.sh >> /data/custom/update_first_telecomv4.log 2>&1') | crontab -
+fi
+echo "[OK] Cron jobs set (daily 04:30 mobile, 04:40 telecom)"
 
 # Run once
 echo ""
 echo "=== Running initial update ==="
 /data/custom/update_first_mobilev4.sh
+/data/custom/update_first_telecomv4.sh
 
 echo ""
 echo "=== Installation complete ==="
