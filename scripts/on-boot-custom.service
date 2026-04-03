@@ -1,0 +1,12 @@
+[Unit]
+Description=Run custom on_boot.d scripts
+After=unifi.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'for f in /data/on_boot.d/*.sh; do [ -x "$f" ] && "$f"; done'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
