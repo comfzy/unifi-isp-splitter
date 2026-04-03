@@ -1,5 +1,7 @@
 # unifi-isp-splitter
 
+[English](README_EN.md)
+
 自动更新 UniFi 网关上的运营商策略路由（Policy Based Routing）分流表。
 
 从 [tcp5.com](http://ros.tcp5.com) 获取最新的运营商 IP 段，解析 RouterOS `.rsc` 格式并同步到 UniFi 的 `traffic_route` 中，实现按运营商分流。
